@@ -1,0 +1,631 @@
+openapi: 3.0.0
+info:
+  title: Global DRO public API
+  description: "Authentication is omitted from this document. "
+  version: 2.0.0
+servers:
+  - url: https://ajaykc90.github.io/TestAPISwagger/
+security:
+  - accessCode:
+      - read
+      - write
+paths:
+  /search:
+    get:
+      summary: Search for brands and ingredients
+      description: >-
+        Used to search for brands and ingredients. Not meant to be used an
+        autocomplete/typeahead.
+      parameters:
+        - name: searchterm
+          in: query
+          description: search by brand or ingredient name - min of 2 chars
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: nationOfPurchaseId
+          in: header
+          description: values from the NationOfPurchase reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: sportId
+          in: header
+          description: values from the Sport reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: userTypeId
+          in: header
+          description: values from the UserType reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: languageId
+          in: header
+          description: values from the Language reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResultSet"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ValidationMessage"
+  /brand/id:
+    get:
+      summary: Get a specific brand
+      description: ""
+      parameters:
+        - name: nationOfPurchaseId
+          in: header
+          description: values from the NationOfPurchase reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: sportId
+          in: header
+          description: values from the Sport reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: userTypeId
+          in: header
+          description: values from the UserType reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: languageId
+          in: header
+          description: values from the Language reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandDetails"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ValidationMessage"
+  /ingredient/id:
+    get:
+      summary: Get a specific ingredient
+      description: ""
+      parameters:
+        - name: nationOfPurchaseId
+          in: header
+          description: values from the NationOfPurchase reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: sportId
+          in: header
+          description: values from the Sport reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: userTypeId
+          in: header
+          description: values from the UserType reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: languageId
+          in: header
+          description: values from the Language reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngredientDetails"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ValidationMessage"
+  /reference/lists:
+    get:
+      summary: Gets one or more lists
+      description: >-
+        Exposes reference lists "NationOfPurchase", "UserType", "Sport",
+        "Language".
+      parameters:
+        - name: listids
+          in: query
+          description: string array of list IDs
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: languageId
+          in: header
+          description: values from the Language reference list
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReferenceList"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ValidationMessage"
+components:
+  schemas:
+    ValidationMessage:
+      type: object
+      properties:
+        message:
+          type: string
+    ReferenceList:
+      type: object
+      properties:
+        id:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReferenceList_items"
+      example:
+        id: NationOfPurchase
+        items:
+          - id: ch
+            value: Switzerland
+          - id: us
+            value: United States
+    SearchResultSet:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - normal
+            - no_matches
+            - no_exact_matches
+            - too_many_partial_display
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResultItem"
+      example:
+        status: normal
+        results:
+          - id: "56924"
+            type: ingredient
+            name: Paraffin
+            alternateNames:
+              - Paraffin (yellow soft)
+            exactMatch: true
+            attributes:
+              - key: DIN
+                name: DIN
+                value: "878254852"
+    SearchResultItem:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - brand
+            - ingredient
+        name:
+          type: string
+        alternateNames:
+          type: array
+          items:
+            type: string
+        exactMatch:
+          type: boolean
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrandAttibute"
+      example:
+        id: "56924"
+        type: ingredient
+        name: Paraffin
+        alternateNames:
+          - Paraffin (yellow soft)
+        exactMatch: true
+        attributes:
+          - key: DIN
+            name: DIN
+            value: "878254852"
+    BrandAttibute:
+      type: object
+      properties:
+        key:
+          type: string
+        name:
+          type: string
+        value:
+          type: string
+    BrandDetails:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrandAttibute"
+        classifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Classification"
+        details:
+          $ref: "#/components/schemas/ProductMeta"
+        statuses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductStatus"
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrandIngredient"
+        notes:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrandDetails_notes"
+      example:
+        id: "812425215"
+        name: Albuterol 90mcg/actuation Inhalation Aerosol
+        attributes:
+          - key: DIN
+            name: DIN
+            value: "878254852"
+        classifications:
+          - key: "6"
+            name: S3
+            description: Beta-2 Agonists
+            wadaText: >-
+              All selective and non-selective beta-2 agonists, including all
+              optical isomers, are prohibited.
+        details:
+          referenceNumber: "202342154451"
+          nationOfPurchase: Canada
+          sport: Cycling
+          userType: Doctor
+          language: English
+          dateTimeStamp: "2023-01-01T16:25:35"
+        statuses:
+          - routeOfAdministration:
+              key: inhalation
+              name: Inhalation - by device
+              description: >-
+                Administration by inhaling medication into the lungs using an
+                inhaler
+              additionalInformation: (by metered-dose Inhaler)
+              notes: []
+            inCompStatus:
+              statusKey: conditional
+              statusName: Conditional
+              statusDescription: This ingredient or brand is prohibited in certain circumstances.
+              competitionTypeName: In Competition
+              competitionTypeDescription: >-
+                The period commencing at 11:59 p.m. on the day before a
+                competition in which the athlete is scheduled to participate
+                through the end of such competition and the sample collection
+                process related to such competition.
+            outOfCompStatus:
+              statusKey: conditional
+              statusName: Conditional
+              statusDescription: This ingredient or brand is prohibited in certain circumstances.
+              competitionTypeName: Out of Competition
+              competitionTypeDescription: >-
+                The period commencing at 11:59 p.m. on the day before a
+                competition in which the athlete is scheduled to participate
+                through the end of such competition and the sample collection
+                process related to such competition.
+        notes:
+          - text: >-
+              Salbutamol is not prohibited by inhalation up to a maximum of 1600
+              micrograms over 24 hours in divided doses not to exceed 600
+              micrograms over 8 hours starting from any dose. This threshold is
+              not valid if you are using any prohibited substances in the
+              category of diuretics and masking agents. In this case, you must
+              have a Therapeutic Use Exemption for both the diuretic/masking
+              agent and salbutamol. Salbutamol administration via nebulization
+              is also prohibited. For further information, please read the WADA
+              Q&A topic on this matter
+            iconData: >-
+              data:image/png;base64,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
+          - text: >-
+              The intravenous (IV) infusion and/or injection of more than 100mL
+              per 12 hour period of any substance is a prohibited method, even
+              if the substance itself is not prohibited, unless it is received
+              while being treated at the hospital, during surgery, or during
+              clinical diagnostic investigations
+            iconData: >-
+              data:image/png;base64,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
+        ingredients:
+          - name: Salbutamol
+            alternateNames:
+              - Albuterol sulfate
+            statuses:
+              - routeOfAdministration:
+                  key: inhalation
+                  name: Inhalation - by device
+                  description: >-
+                    Administration by inhaling medication into the lungs using
+                    an inhaler
+                  additionalInformation: (by metered-dose Inhaler)
+                  notes: []
+                inCompStatus:
+                  statusKey: conditional
+                  statusName: Conditional
+                  statusDescription: >-
+                    This ingredient or brand is prohibited in certain
+                    circumstances.
+                  competitionTypeName: In Competition
+                  competitionTypeDescription: >-
+                    The period commencing at 11:59 p.m. on the day before a
+                    competition in which the athlete is scheduled to participate
+                    through the end of such competition and the sample
+                    collection process related to such competition.
+                outOfCompStatus:
+                  statusKey: conditional
+                  statusName: Conditional
+                  statusDescription: >-
+                    This ingredient or brand is prohibited in certain
+                    circumstances.
+                  competitionTypeName: Out of Competition
+                  competitionTypeDescription: >-
+                    The period commencing at 11:59 p.m. on the day before a
+                    competition in which the athlete is scheduled to participate
+                    through the end of such competition and the sample
+                    collection process related to such competition.
+    IngredientDetails:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        alternateNames:
+          type: array
+          items:
+            type: string
+        classifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Classification"
+        details:
+          $ref: "#/components/schemas/ProductMeta"
+        statuses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductStatus"
+        notes:
+          type: array
+          items:
+            $ref: "#/components/schemas/BrandDetails_notes"
+      example:
+        id: "985452"
+        name: Paraffin
+        alternateNames:
+          - Paraffin (yellow soft)
+          - Paraffin (white soft)
+        classifications:
+          - key: "2"
+            name: N/A
+            description: No Classification
+            wadaText: >-
+              This ingredient is not currently included on the WADA Prohibited
+              List.
+        details:
+          referenceNumber: "202342154451"
+          nationOfPurchase: Canada
+          sport: Cycling
+          userType: Doctor
+          language: English
+          dateTimeStamp: "2023-01-01T16:25:35"
+        statuses:
+          - inCompStatus:
+              statusKey: not_prohibited
+              statusName: Not Prohibited
+              statusDescription: >-
+                Subject to the conditions / warnings shown in the search result,
+                there are no restrictions on the use of this ingredient or brand
+                according to the current WADA Prohibited List.
+              competitionTypeName: In Competition
+              competitionTypeDescription: >-
+                The period commencing at 11:59 p.m. on the day before a
+                competition in which the athlete is scheduled to participate
+                through the end of such competition and the sample collection
+                process related to such competition.
+            outOfCompStatus:
+              statusKey: not_prohibited
+              statusName: Not Prohibited
+              statusDescription: >-
+                Subject to the conditions / warnings shown in the search result,
+                there are no restrictions on the use of this ingredient or brand
+                according to the current WADA Prohibited List.
+              competitionTypeName: Out of Competition
+              competitionTypeDescription: >-
+                The period commencing at 11:59 p.m. on the day before a
+                competition in which the athlete is scheduled to participate
+                through the end of such competition and the sample collection
+                process related to such competition.
+        notes: []
+    ProductMeta:
+      type: object
+      properties:
+        referenceNumber:
+          type: string
+        nationOfPurchase:
+          type: string
+        sport:
+          type: string
+        userType:
+          type: string
+        language:
+          type: string
+        dateTimeStamp:
+          type: string
+    ProductStatus:
+      type: object
+      properties:
+        routeOfAdministration:
+          $ref: "#/components/schemas/RouteOfAdmin"
+        inCompStatus:
+          $ref: "#/components/schemas/ProhibitedStatus"
+        outOfCompStatus:
+          $ref: "#/components/schemas/ProhibitedStatus"
+    ProhibitedStatus:
+      type: object
+      properties:
+        statusKey:
+          type: string
+        statusName:
+          type: string
+        statusDescription:
+          type: string
+        competitionTypeName:
+          type: string
+        competitionTypeDescription:
+          type: string
+    RouteOfAdmin:
+      type: object
+      properties:
+        key:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        additionalInformation:
+          type: string
+        notes:
+          type: array
+          items:
+            $ref: "#/components/schemas/RouteOfAdmin_notes"
+    Classification:
+      type: object
+      properties:
+        key:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        wadaText:
+          type: string
+    BrandIngredient:
+      type: object
+      properties:
+        name:
+          type: string
+        alternateNames:
+          type: array
+          items:
+            type: string
+        statuses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductStatus"
+    ReferenceList_items:
+      type: object
+      properties:
+        id:
+          type: string
+        parentId:
+          type: string
+        value:
+          type: string
+    BrandDetails_notes:
+      type: object
+      properties:
+        text:
+          type: string
+        iconData:
+          type: string
+    RouteOfAdmin_notes:
+      type: object
+      properties:
+        key:
+          type: string
+        text:
+          type: string
+  securitySchemes:
+    accessCode:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: http://example.com/oauth/auth
+          tokenUrl: http://example.com/oauth/token
+          scopes:
+            write: allows modifying resources
+            read: allows reading resources
