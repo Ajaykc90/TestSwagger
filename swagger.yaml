@@ -4,7 +4,7 @@ info:
   description: "Authentication is omitted from this document. "
   version: 2.0.0
 servers:
-  - url: swagger.yaml
+  - url: /
 security:
   - accessCode:
       - read
